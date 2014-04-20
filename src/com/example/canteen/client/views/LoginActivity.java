@@ -12,7 +12,7 @@ import com.example.canteen.client.Application;
 import com.example.canteen.client.api.Client;
 import com.example.canteen.service.Facade;
 
-public class LoginActivity extends Activity {
+public class LoginActivity extends CanteenActivity {
     private Client _client;
 
     public void onCreate(Bundle savedInstanceState) {

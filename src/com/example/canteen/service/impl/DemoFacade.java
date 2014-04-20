@@ -14,6 +14,11 @@ public class DemoFacade implements Facade {
     private Map<String, String> _passwords = new LinkedHashMap<String, String>();
 
     private final OrdersProcessor _ordersProcessor = new OrdersProcessor();
+    private final MenuSchedule _menuSchedule = new MenuSchedule(null);
+
+    public DemoFacade() {
+        _menuSchedule.schedule(new Menu(new ArrayList<Dish>(), new Date(13500000)));
+    }
 
     @Override public AuthToken authenticate(String name, String password) throws NotAuthorizedException {
         if (_passwords.containsKey(name) && _passwords.get(name).equals(password)) {
@@ -47,7 +52,7 @@ public class DemoFacade implements Facade {
 
     @Override
     public Menu getCurrentMenu(AuthToken authToken) {
-        return new Menu(new ArrayList<Dish>(), new Date(13500000));
+        return _menuSchedule.currentMenu();
     }
 
     @Override

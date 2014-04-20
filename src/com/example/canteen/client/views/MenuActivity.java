@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 
 public class MenuActivity extends CanteenActivity {
     private Client _client;
+    private Order _order;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,23 +24,27 @@ public class MenuActivity extends CanteenActivity {
         _client = ((Application)getApplication()).getClient();
         setContentView(R.layout.menu_view);
 
-        final Order order = new Order();
-        order.addItem(new Dish("Potatoes", "Delicious potatoes", new BigDecimal(3.95)), 2);
-        order.addItem(new Dish("Chicken", "Yong chicken", new BigDecimal(4.50)), 4);
+        _order = new Order();
+        _order.addItem(new Dish("Potatoes", "Delicious potatoes", new BigDecimal(3.95)), 2);
+        _order.addItem(new Dish("Chicken", "Yong chicken", new BigDecimal(4.50)), 4);
 
         ((Button)findViewById(R.id.order)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                performRequest(new Runnable() {
-                    @Override
-                    public void run() {
-                        Order orderDetails = _client.submitOrder(order);
+                onClickOrderNow();
+            }
+        });
+    }
 
-                        Intent intent = new Intent(MenuActivity.this, OrderDetailsActivity.class);
-                        intent.putExtra(OrderDetailsActivity.ORDER_KEY, orderDetails);
-                        startActivity(intent);
-                    }
-                });
+    private void onClickOrderNow() {
+        performRequest(new Runnable() {
+            @Override
+            public void run() {
+                Order orderDetails = _client.submitOrder(_order);
+
+                Intent intent = new Intent(MenuActivity.this, OrderDetailsActivity.class);
+                intent.putExtra(OrderDetailsActivity.ORDER_KEY, orderDetails);
+                startActivity(intent);
             }
         });
     }
