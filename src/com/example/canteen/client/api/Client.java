@@ -3,6 +3,7 @@ package com.example.canteen.client.api;
 import com.example.canteen.service.Facade;
 import com.example.canteen.service.data.AuthToken;
 import com.example.canteen.service.data.Order;
+import com.example.canteen.service.data.PublishingDetails;
 import com.example.canteen.service.data.User;
 
 public class Client {
@@ -27,6 +28,10 @@ public class Client {
         } catch (Facade.NotAuthorizedException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    public PublishingDetails getCurrentMenu() {
+        return _server.getCurrentMenu(_authToken);
     }
 
     public Order submitOrder(Order order) throws Facade.NotAuthorizedException {

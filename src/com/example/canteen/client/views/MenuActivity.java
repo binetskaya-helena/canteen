@@ -11,6 +11,7 @@ import com.example.canteen.client.api.Client;
 import com.example.canteen.service.Facade;
 import com.example.canteen.service.data.Dish;
 import com.example.canteen.service.data.Order;
+import com.example.canteen.service.data.PublishingDetails;
 
 import java.math.BigDecimal;
 
@@ -23,6 +24,14 @@ public class MenuActivity extends CanteenActivity {
 
         _client = ((Application)getApplication()).getClient();
         setContentView(R.layout.menu_view);
+
+        performRequest(new Runnable() {
+            @Override
+            public void run() {
+                PublishingDetails menu = _client.getCurrentMenu();
+                // todo: display the menu
+            }
+        });
 
         _order = new Order();
         _order.addItem(new Dish("Potatoes", "Delicious potatoes", new BigDecimal(3.95)), 2);

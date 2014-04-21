@@ -1,23 +1,40 @@
 package com.example.canteen.service.impl;
 
 import com.example.canteen.service.Facade;
+import com.example.canteen.service.TimeService;
 import com.example.canteen.service.data.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class DemoFacade implements Facade {
+public class Canteen implements Facade {
 
     private Map<String, User> _users = new LinkedHashMap<String, User>();
     private Map<String, String> _passwords = new LinkedHashMap<String, String>();
 
     private final OrdersProcessor _ordersProcessor = new OrdersProcessor();
-    private final MenuSchedule _menuSchedule = new MenuSchedule(null);
+    private final MenuSchedule _menuSchedule;
 
-    public DemoFacade() {
-        _menuSchedule.schedule(new Menu(new ArrayList<Dish>(), new Date(13500000)));
+    public Canteen(TimeService timeService) {
+        _menuSchedule = new MenuSchedule(timeService);
+        _menuSchedule.setOnMenuUpdate(new Runnable() {
+            @Override
+            public void run() {
+                // todo: tune up the orders processor, push notification to the clients
+            }
+        });
+
+        // demo
+        Menu menu = new Menu();
+        menu.addDish(new Dish("Potatoes", "Delicious potatoes", new BigDecimal(3.95)));
+        menu.addDish(new Dish("Chicken", "Yong chicken", new BigDecimal(4.50)));
+        menu.setPublishingDate(timeService.now());
+        menu.setOrderingDeadline(new Date(timeService.now().getTime() + 3600000));
+        menu.setValidThrough(new Date(timeService.now().getTime() + 3700000));
+        _menuSchedule.schedule(menu);
     }
 
     @Override public AuthToken authenticate(String name, String password) throws NotAuthorizedException {
@@ -51,7 +68,7 @@ public class DemoFacade implements Facade {
     }
 
     @Override
-    public Menu getCurrentMenu(AuthToken authToken) {
+    public PublishingDetails getCurrentMenu(AuthToken authToken) {
         return _menuSchedule.currentMenu();
     }
 

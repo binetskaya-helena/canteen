@@ -1,8 +1,14 @@
 package com.example.canteen.client;
 
+import android.os.Handler;
 import com.example.canteen.client.api.Client;
 import com.example.canteen.service.Facade;
-import com.example.canteen.service.impl.DemoFacade;
+import com.example.canteen.service.TimeService;
+import com.example.canteen.service.impl.Canteen;
+
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class Application extends android.app.Application {
     private Facade _server;
@@ -11,7 +17,24 @@ public class Application extends android.app.Application {
     @Override public void onCreate() {
         super.onCreate();
 
-        _server = new DemoFacade();
+        _server = new Canteen(new TimeService() {
+            private Handler _handler = new Handler();
+
+            @Override
+            public Date now() {
+                return new Date(System.currentTimeMillis());
+            }
+
+            @Override
+            public void schedule(Date when, Runnable action) {
+                _handler.postDelayed(action, when.getTime() - now().getTime());
+            }
+
+            @Override
+            public void cancel(Runnable action) {
+                _handler.removeCallbacks(action);
+            }
+        });
     }
 
     public Client getClient() {
