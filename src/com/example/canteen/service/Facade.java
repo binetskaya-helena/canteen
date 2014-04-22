@@ -8,7 +8,7 @@ public interface Facade {
 
     AuthToken authenticate(String name, String password);
     void registerUser(String name, String password) throws DomainError;
-    User getUser(AuthToken authToken);
+    User getUser(String name, AuthToken authToken);
 
     PublishingDetails getCurrentMenu(AuthToken authToken);
     Order submitOrder(Order order, AuthToken authToken);

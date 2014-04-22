@@ -6,19 +6,17 @@ import com.example.canteen.service.data.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class Canteen implements Facade {
     private final AccountsManager _accountsManager;
+    private final AccessControl _accessControl;
     private final OrdersProcessor _ordersProcessor;
     private final MenuSchedule _menuSchedule;
     private final OrderingService _orderingService;
 
-    private Map<String, User> _users = new LinkedHashMap<String, User>();
-
     public Canteen(TimeService timeService) {
         _accountsManager = new AccountsManager();
+        _accessControl = new AccessControl(_accountsManager);
         _ordersProcessor = new OrdersProcessor();
         _menuSchedule = new MenuSchedule(timeService);
         _orderingService = new OrderingService(_menuSchedule, _ordersProcessor);
@@ -35,15 +33,7 @@ public class Canteen implements Facade {
     }
 
     @Override public AuthToken authenticate(String name, String password) throws NotAuthorizedException {
-        User user = _accountsManager.getUser(name);
-        if (null != user && _accountsManager.authenticate(user, password)) {
-            AuthToken token = new AuthToken(name + password);
-            _users.put(token.token, user);
-            return token;
-
-        } else {
-            throw new NotAuthorizedException();
-        }
+        return _accessControl.authenticate(name, password);
     }
 
     @Override public void registerUser(String name, String password) throws DomainError {
@@ -51,40 +41,25 @@ public class Canteen implements Facade {
         _accountsManager.addUser(user, password);
     }
 
-    @Override public User getUser(final AuthToken authToken) throws NotAuthorizedException {
-        return performAuthorized(authToken, new AuthorizedAction<User>() {
+    @Override public User getUser(final String name, AuthToken authToken) throws NotAuthorizedException {
+        return _accessControl.performAuthorized(authToken, new AccessControl.AuthorizedAction<User>() {
             @Override
             public User perform() {
-                return _users.get(authToken.token);
+                return _accountsManager.getUser(name);
             }
         });
     }
 
-    @Override
-    public PublishingDetails getCurrentMenu(AuthToken authToken) {
+    @Override public PublishingDetails getCurrentMenu(AuthToken authToken) {
         return _menuSchedule.currentMenu();
     }
 
-    @Override
-    public Order submitOrder(final Order order, AuthToken authToken) throws NotAuthorizedException {
-        return performAuthorized(authToken, new AuthorizedAction<Order>() {
+    @Override public Order submitOrder(final Order order, AuthToken authToken) throws NotAuthorizedException {
+        return _accessControl.performAuthorized(authToken, new AccessControl.AuthorizedAction<Order>() {
             @Override
             public Order perform() {
                 return _orderingService.submitOrder(order);
             }
         });
-    }
-
-    private <Result> Result performAuthorized(AuthToken authToken, AuthorizedAction<Result> action) throws NotAuthorizedException {
-        if (null != authToken && _users.containsKey(authToken.token)) {
-            return action.perform();
-
-        } else {
-            throw new NotAuthorizedException();
-        }
-    }
-
-    private interface AuthorizedAction<Result> {
-        Result perform();
     }
 }

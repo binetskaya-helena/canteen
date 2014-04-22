@@ -17,7 +17,7 @@ public class Client {
 
     public void signIn(String name, String password) throws Facade.NotAuthorizedException {
         _authToken = _server.authenticate(name, password);
-        _user = _server.getUser(_authToken);
+        _user = _server.getUser(name, _authToken);
     }
 
     public void signUp(String name, String password) throws Facade.DomainError {
