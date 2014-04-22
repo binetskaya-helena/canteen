@@ -15,17 +15,14 @@ public class Canteen implements Facade {
     private Map<String, User> _users = new LinkedHashMap<String, User>();
     private Map<String, String> _passwords = new LinkedHashMap<String, String>();
 
-    private final OrdersProcessor _ordersProcessor = new OrdersProcessor();
+    private final OrdersProcessor _ordersProcessor;
     private final MenuSchedule _menuSchedule;
+    private final OrderingService _orderingService;
 
     public Canteen(TimeService timeService) {
+        _ordersProcessor = new OrdersProcessor();
         _menuSchedule = new MenuSchedule(timeService);
-        _menuSchedule.setOnMenuUpdate(new Runnable() {
-            @Override
-            public void run() {
-                // todo: tune up the orders processor, push notification to the clients
-            }
-        });
+        _orderingService = new OrderingService(_menuSchedule, _ordersProcessor);
 
         // demo
         Menu menu = new Menu();
@@ -77,7 +74,7 @@ public class Canteen implements Facade {
         return performAuthorized(authToken, new AuthorizedAction<Order>() {
             @Override
             public Order perform() {
-                return _ordersProcessor.submit(order);
+                return _orderingService.submitOrder(order);
             }
         });
     }
