@@ -28,7 +28,8 @@ public class Canteen implements Facade {
         Menu menu = new Menu();
         menu.addDish(new Dish("Potatoes", "Delicious potatoes", new BigDecimal(3.95)));
         menu.addDish(new Dish("Chicken", "Yong chicken", new BigDecimal(4.50)));
-        menu.setPublishingDate(timeService.now());
+        menu.addDish(new Dish("Tapas", "Tapas with Bull's tail", new BigDecimal(5.75)));
+        menu.setPublishingDate(new Date(timeService.now().getTime() - 1000));
         menu.setOrderingDeadline(new Date(timeService.now().getTime() + 3600000));
         menu.setValidThrough(new Date(timeService.now().getTime() + 3700000));
         _menuSchedule.schedule(menu);

@@ -14,7 +14,6 @@ public class OrderingService {
         _menuSchedule.setOnMenuUpdate(new Runnable() {
             @Override
             public void run() {
-                // todo: push notification to the clients
                 checkOrderingAvailability();
             }
         });
@@ -23,7 +22,7 @@ public class OrderingService {
 
     private void checkOrderingAvailability() {
         PublishingDetails details = _menuSchedule.currentMenu();
-        _ordersProcessor.setOrderingEnabled(null != details && details.orderingEnabled);
+        _ordersProcessor.setOrderingEnabled(details.orderingEnabled);
     }
 
     public Order submitOrder(Order order) {

@@ -17,6 +17,18 @@ public class Order implements Serializable {
         _items.put(dish, _items.get(dish) + quantity);
     }
 
+    public void removeItem(Dish dish, int quantityToRemove) {
+        if (_items.containsKey(dish)) {
+            int orderedQuantity = _items.get(dish);
+            orderedQuantity = (orderedQuantity > quantityToRemove ? orderedQuantity - quantityToRemove : 0);
+            if (orderedQuantity > 0) {
+                _items.put(dish, orderedQuantity);
+            } else {
+                _items.remove(dish);
+            }
+        }
+    }
+
     public Map<Dish, Integer> items() {
         return _items;
     }

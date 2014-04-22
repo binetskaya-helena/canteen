@@ -1,46 +1,72 @@
 package com.example.canteen.client.views;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import com.example.canteen.R;
 import com.example.canteen.client.Application;
 import com.example.canteen.client.api.Client;
-import com.example.canteen.service.Facade;
 import com.example.canteen.service.data.Dish;
 import com.example.canteen.service.data.Order;
 import com.example.canteen.service.data.PublishingDetails;
 
-import java.math.BigDecimal;
-
 public class MenuActivity extends CanteenActivity {
     private Client _client;
-    private Order _order;
+    private Order _orderBuilder;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         _client = ((Application)getApplication()).getClient();
+        _orderBuilder = new Order();
+
         setContentView(R.layout.menu_view);
-
-        performRequest(new Runnable() {
-            @Override
-            public void run() {
-                PublishingDetails menu = _client.getCurrentMenu();
-                // todo: display the menu
-            }
-        });
-
-        _order = new Order();
-        _order.addItem(new Dish("Potatoes", "Delicious potatoes", new BigDecimal(3.95)), 2);
-        _order.addItem(new Dish("Chicken", "Yong chicken", new BigDecimal(4.50)), 4);
 
         ((Button)findViewById(R.id.order)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 onClickOrderNow();
+            }
+        });
+
+        updateMenu();
+    }
+
+    public void updateMenu() {
+        performRequest(new Runnable() {
+            @Override
+            public void run() {
+                PublishingDetails details = _client.getCurrentMenu();
+
+                ViewGroup view = (ViewGroup)findViewById(R.id.menu);
+                view.removeAllViews();
+                if (null != details.menu) {
+                    for (final Dish dish : details.menu.dishes()) {
+                        CheckBox dishView = new CheckBox(view.getContext());
+                        dishView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                        dishView.setText(dish.name());
+                        dishView.setChecked(_orderBuilder.items().containsKey(dish));
+                        dishView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                            @Override
+                            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                                if (isChecked) {
+                                    _orderBuilder.addItem(dish, 1);
+                                } else {
+                                    _orderBuilder.removeItem(dish, 1);
+                                }
+                            }
+                        });
+                        view.addView(dishView);
+                    }
+                }
+                Button orderButton = (Button)findViewById(R.id.order);
+                orderButton.setEnabled(details.orderingEnabled);
+                orderButton.setText(details.orderingEnabled ? "Order Now" : "Sorry. To late for pre-ordering.");
             }
         });
     }
@@ -49,7 +75,7 @@ public class MenuActivity extends CanteenActivity {
         performRequest(new Runnable() {
             @Override
             public void run() {
-                Order orderDetails = _client.submitOrder(_order);
+                Order orderDetails = _client.submitOrder(_orderBuilder);
 
                 Intent intent = new Intent(MenuActivity.this, OrderDetailsActivity.class);
                 intent.putExtra(OrderDetailsActivity.ORDER_KEY, orderDetails);

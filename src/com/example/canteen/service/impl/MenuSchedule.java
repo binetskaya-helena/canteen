@@ -16,7 +16,7 @@ public class MenuSchedule {
             return menu.orderingDeadline().compareTo(menu2.orderingDeadline());
         }
     });
-    private PublishingDetails _currentMenu;
+    private PublishingDetails _currentMenu = new PublishingDetails(null, false, false);
     private Date _scheduleCheckDate;
     private Runnable _checkSchedule = new Runnable() {
         @Override
@@ -58,6 +58,9 @@ public class MenuSchedule {
             boolean isAvailable = date.after(nextMenu.publishingDate());
             boolean orderingEnabled = isAvailable && date.before(nextMenu.orderingDeadline());
             details = new PublishingDetails(nextMenu, isAvailable, orderingEnabled);
+
+        } else {
+            details = new PublishingDetails(null, false, false);
         }
         return details;
     }
@@ -66,7 +69,7 @@ public class MenuSchedule {
         Date now = _timeService.now();
         PublishingDetails menuDetails = nextMenuForDate(now);
         Date nextCheckDate = null;
-        if (null != menuDetails) {
+        if (null != menuDetails.menu) {
             if (!menuDetails.isAvailable) {
                 nextCheckDate = menuDetails.menu.publishingDate();
             } else if (menuDetails.orderingEnabled) {
@@ -83,7 +86,7 @@ public class MenuSchedule {
             }
         }
 
-        if ((menuDetails == null || _currentMenu == null) && menuDetails != _currentMenu || !_currentMenu.equals(menuDetails)) {
+        if (!_currentMenu.equals(menuDetails)) {
             _currentMenu = menuDetails;
             notifyMenuUpdated();
         }
