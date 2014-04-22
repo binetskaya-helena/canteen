@@ -12,4 +12,7 @@ public interface Facade {
 
     PublishingDetails getCurrentMenu(AuthToken authToken);
     Order submitOrder(Order order, AuthToken authToken);
+
+    Menu scheduleMenu(Menu menu, AuthToken authToken);
+    void cancelMenu(Menu menu, AuthToken authToken);
 }

@@ -62,4 +62,23 @@ public class Canteen implements Facade {
             }
         });
     }
+
+    @Override public Menu scheduleMenu(final Menu menu, AuthToken authToken) {
+        return _accessControl.performAuthorized(authToken, new AccessControl.AuthorizedAction<Menu>() {
+            @Override
+            public Menu perform() {
+                return _menuSchedule.schedule(menu);
+            }
+        });
+    }
+
+    @Override public void cancelMenu(final Menu menu, AuthToken authToken) {
+        _accessControl.performAuthorized(authToken, new AccessControl.AuthorizedAction<Object>() {
+            @Override
+            public Object perform() {
+                _menuSchedule.remove(menu);
+                return null;
+            }
+        });
+    }
 }

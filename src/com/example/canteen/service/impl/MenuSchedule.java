@@ -30,9 +30,10 @@ public class MenuSchedule {
         _timeService = timeService;
     }
 
-    public void schedule(final Menu menu) {
+    public Menu schedule(final Menu menu) {
         _queue.add(menu);
         checkSchedule();
+        return menu;
     }
 
     public void remove(Menu menu) {
