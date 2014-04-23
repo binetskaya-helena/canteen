@@ -1,6 +1,7 @@
 package com.example.canteen.service.impl;
 
 import com.example.canteen.service.Facade;
+import com.example.canteen.service.data.AccessGroup;
 import com.example.canteen.service.data.AuthToken;
 import com.example.canteen.service.data.User;
 
@@ -8,35 +9,50 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class AccessControl {
-    private final AccountsManager _accountsManager;
-    private Map<String, User> _users = new LinkedHashMap<String, User>();
+    private Map<String, User> _tokens = new LinkedHashMap<String, User>();
+    private Map<String, AccessGroup> _users = new LinkedHashMap<String, AccessGroup>();
+    private Map<String, AccessGroup> _groups = new LinkedHashMap<String, AccessGroup>();
+    private AccessGroup _defaultGroup;
 
     public interface AuthorizedAction<Result> {
         Result perform();
     }
 
-    public AccessControl(AccountsManager accountsManager) {
-        _accountsManager = accountsManager;
+    public AuthToken createAuthToken(User user) {
+        AuthToken token = new AuthToken(makeTokenData(user));
+        _tokens.put(token.token, user);
+        return token;
     }
 
-    public AuthToken authenticate(String name, String password) {
-        User user = _accountsManager.getUser(name);
-        if (null != user && _accountsManager.authenticate(user, password)) {
-            AuthToken token = new AuthToken(name + password);
-            _users.put(token.token, user);
-            return token;
+    private String makeTokenData(User user) {
+        return Integer.toHexString(user.name().hashCode());
+    }
 
-        } else {
-            throw new Facade.NotAuthorizedException();
+    public void registerAccessGroup(AccessGroup group) {
+        _groups.put(group.name(), group);
+    }
+
+    public AccessGroup getAccessGroup(String name) {
+        return _groups.get(name);
+    }
+
+    public void setPermissions(User user, AccessGroup group) {
+        _users.put(user.name(), group);
+    }
+
+    public void setDefaultGroup(AccessGroup group) {
+        _defaultGroup = group;
+    }
+
+    public <Result> Result performAuthorized(String actionName, AuthToken authToken, AuthorizedAction<Result> action) {
+        AccessGroup access = null;
+        if (null == authToken) {
+            access = _defaultGroup;
+
+        } else if (_tokens.containsKey(authToken.token)) {
+            access = _users.get(_tokens.get(authToken.token).name());
         }
-    }
-
-    public User getUser(final AuthToken authToken) {
-        return _users.get(authToken.token);
-    }
-
-    public <Result> Result performAuthorized(AuthToken authToken, AuthorizedAction<Result> action) {
-        if (null != authToken && _users.containsKey(authToken.token)) {
+        if (null != access && access.permittedActions().contains(actionName)) {
             return action.perform();
 
         } else {

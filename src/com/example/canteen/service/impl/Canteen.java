@@ -10,13 +10,17 @@ import java.util.Date;
 public class Canteen implements Facade {
     private final AccountsManager _accountsManager;
     private final AccessControl _accessControl;
+    private final AccountsService _accountsService;
+
     private final OrdersProcessor _ordersProcessor;
     private final MenuSchedule _menuSchedule;
     private final OrderingService _orderingService;
 
     public Canteen(TimeService timeService) {
         _accountsManager = new AccountsManager();
-        _accessControl = new AccessControl(_accountsManager);
+        _accessControl = new AccessControl();
+        _accountsService = new AccountsService(_accountsManager, _accessControl);
+
         _ordersProcessor = new OrdersProcessor();
         _menuSchedule = new MenuSchedule(timeService);
         _orderingService = new OrderingService(_menuSchedule, _ordersProcessor);
@@ -33,16 +37,21 @@ public class Canteen implements Facade {
     }
 
     @Override public AuthToken authenticate(String name, String password) throws NotAuthorizedException {
-        return _accessControl.authenticate(name, password);
+        return _accountsService.authenticate(name, password);
     }
 
-    @Override public void registerUser(String name, String password) throws DomainError {
-        User user = new User(null, name);
-        _accountsManager.addUser(user, password);
+    @Override public void registerUser(final String name, final String password) throws DomainError {
+        _accessControl.performAuthorized(REGISTER_USER_ACTION, null, new AccessControl.AuthorizedAction<Object>() {
+            @Override
+            public Object perform() {
+                _accountsService.registerClient(name, password);
+                return null;
+            }
+        });
     }
 
     @Override public User getUser(final String name, AuthToken authToken) throws NotAuthorizedException {
-        return _accessControl.performAuthorized(authToken, new AccessControl.AuthorizedAction<User>() {
+        return _accessControl.performAuthorized(GET_USER_ACTION, authToken, new AccessControl.AuthorizedAction<User>() {
             @Override
             public User perform() {
                 return _accountsManager.getUser(name);
@@ -51,11 +60,16 @@ public class Canteen implements Facade {
     }
 
     @Override public PublishingDetails getCurrentMenu(AuthToken authToken) {
-        return _menuSchedule.currentMenu();
+        return _accessControl.performAuthorized(GET_CURRENT_MENU_ACTION, null, new AccessControl.AuthorizedAction<PublishingDetails>() {
+            @Override
+            public PublishingDetails perform() {
+                return _menuSchedule.currentMenu();
+            }
+        });
     }
 
     @Override public Order submitOrder(final Order order, AuthToken authToken) throws NotAuthorizedException {
-        return _accessControl.performAuthorized(authToken, new AccessControl.AuthorizedAction<Order>() {
+        return _accessControl.performAuthorized(SUBMIT_ORDER_ACTION, authToken, new AccessControl.AuthorizedAction<Order>() {
             @Override
             public Order perform() {
                 return _orderingService.submitOrder(order);
@@ -64,7 +78,7 @@ public class Canteen implements Facade {
     }
 
     @Override public Menu scheduleMenu(final Menu menu, AuthToken authToken) {
-        return _accessControl.performAuthorized(authToken, new AccessControl.AuthorizedAction<Menu>() {
+        return _accessControl.performAuthorized(CREATE_MENU_ACTION, authToken, new AccessControl.AuthorizedAction<Menu>() {
             @Override
             public Menu perform() {
                 return _menuSchedule.schedule(menu);
@@ -73,7 +87,7 @@ public class Canteen implements Facade {
     }
 
     @Override public void cancelMenu(final Menu menu, AuthToken authToken) {
-        _accessControl.performAuthorized(authToken, new AccessControl.AuthorizedAction<Object>() {
+        _accessControl.performAuthorized(REMOVE_MENU_ACTION, authToken, new AccessControl.AuthorizedAction<Object>() {
             @Override
             public Object perform() {
                 _menuSchedule.remove(menu);
