@@ -23,7 +23,7 @@ public class Canteen implements Facade {
 
         _ordersProcessor = new OrdersProcessor();
         _menuSchedule = new MenuSchedule(timeService);
-        _orderingService = new OrderingService(_menuSchedule, _ordersProcessor);
+        _orderingService = new OrderingService(_menuSchedule, _ordersProcessor, timeService);
 
         // demo
         Menu menu = new Menu();

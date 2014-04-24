@@ -2,6 +2,7 @@ package com.example.canteen.service.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ public class Order implements Serializable {
     private User _user;
     private Map<Dish, Integer> _items = new LinkedHashMap<Dish, Integer>();
     private String _id;
+    private Date _date;
 
     public void addItem(Dish dish, int quantity) {
         if (!_items.containsKey(dish)) {
@@ -47,6 +49,14 @@ public class Order implements Serializable {
 
     public String ID() {
         return _id;
+    }
+
+    public void setDate(Date date) {
+        _date = date;
+    }
+
+    public Date date() {
+        return _date;
     }
 
     public BigDecimal calculateTotalPrice() {
