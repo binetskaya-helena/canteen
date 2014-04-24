@@ -2,6 +2,9 @@ package com.example.canteen.service;
 
 import com.example.canteen.service.data.*;
 
+import java.util.Date;
+import java.util.Map;
+
 public interface Facade {
     class NotAuthorizedException extends RuntimeException {}
     class DomainError extends RuntimeException {}
@@ -25,4 +28,7 @@ public interface Facade {
 
     static String REMOVE_MENU_ACTION = "DELETE menu";
     void cancelMenu(Menu menu, AuthToken authToken);
+
+    static String GET_ORDERED_DISHES_ACTION = "GET orders/aggregated";
+    Map<Dish, Integer> getOrderedDishes(Date from, Date to, AuthToken authToken);
 }

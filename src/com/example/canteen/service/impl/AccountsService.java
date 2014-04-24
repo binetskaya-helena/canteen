@@ -36,7 +36,8 @@ public class AccountsService {
                 Facade.GET_USER_ACTION,
                 Facade.GET_CURRENT_MENU_ACTION,
                 Facade.CREATE_MENU_ACTION,
-                Facade.REMOVE_MENU_ACTION
+                Facade.REMOVE_MENU_ACTION,
+                Facade.GET_ORDERED_DISHES_ACTION
         })));
         _accessControl.registerAccessGroup(cooksGroup);
     }

@@ -34,7 +34,7 @@ public class OrdersProcessor_Tests extends AndroidTestCase {
         }
     }
 
-    public void testAggregatedDishesOrder() {
+    public void testAggregatedOrderedDishes() {
         OrdersProcessor processor = new OrdersProcessor();
         processor.setOrderingEnabled(true);
 
@@ -50,7 +50,7 @@ public class OrdersProcessor_Tests extends AndroidTestCase {
         order2.addItem(dish1, 1989);
         processor.submit(order2);
 
-        Map<Dish, Integer> dishes = processor.getAggregatedDishes();
+        Map<Dish, Integer> dishes = processor.getAggregatedDishes(null, null);
         assert dishes.size() == 2;
         assert dishes.get(dish1) == 2031;
         assert dishes.get(dish2) == 1;

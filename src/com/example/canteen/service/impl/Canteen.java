@@ -6,6 +6,7 @@ import com.example.canteen.service.data.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Map;
 
 public class Canteen implements Facade {
     private final AccountsManager _accountsManager;
@@ -92,6 +93,15 @@ public class Canteen implements Facade {
             public Object perform() {
                 _menuSchedule.remove(menu);
                 return null;
+            }
+        });
+    }
+
+    @Override public Map<Dish, Integer> getOrderedDishes(final Date from, final Date to, AuthToken authToken) {
+        return _accessControl.performAuthorized(GET_ORDERED_DISHES_ACTION, authToken, new AccessControl.AuthorizedAction<Map<Dish, Integer>>() {
+            @Override
+            public Map<Dish, Integer> perform() {
+                return _ordersProcessor.getAggregatedDishes(from, to);
             }
         });
     }

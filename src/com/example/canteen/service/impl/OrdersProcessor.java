@@ -3,10 +3,7 @@ package com.example.canteen.service.impl;
 import com.example.canteen.service.data.Dish;
 import com.example.canteen.service.data.Order;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class OrdersProcessor {
     private static int _lastId;
@@ -35,14 +32,17 @@ public class OrdersProcessor {
         _orders.remove(order);
     }
 
-    public Map<Dish, Integer> getAggregatedDishes() {
+    public Map<Dish, Integer> getAggregatedDishes(Date from, Date to) {
         Map<Dish, Integer> dishes = new LinkedHashMap<Dish, Integer>();
         for (Order order : _orders) {
-            for (Map.Entry<Dish, Integer> entry : order.items().entrySet()) {
-                if (!dishes.containsKey(entry.getKey())) {
-                    dishes.put(entry.getKey(), 0);
+            if ((from == null || order.date().after(from)) && (to == null || order.date().before(to))) {
+                for (Map.Entry<Dish, Integer> entry : order.items().entrySet()) {
+                    Dish dish = entry.getKey();
+                    if (!dishes.containsKey(dish)) {
+                        dishes.put(dish, 0);
+                    }
+                    dishes.put(dish, dishes.get(dish) + entry.getValue());
                 }
-                dishes.put(entry.getKey(), dishes.get(entry.getKey()) + entry.getValue());
             }
         }
         return dishes;
