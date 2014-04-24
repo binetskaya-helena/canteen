@@ -15,21 +15,20 @@ public class OrdersProcessor {
     private boolean _orderingEnabled = false;
 
     public class OrderingDisabledException extends RuntimeException {}
+    public class EmptyOrderException extends RuntimeException {}
 
     public void setOrderingEnabled(boolean orderingEnabled) {
         _orderingEnabled = orderingEnabled;
     }
 
     public Order submit(Order order) throws OrderingDisabledException {
-        if (_orderingEnabled) {
-            _lastId++;
-            order.setID(String.format("%05X", _lastId));
-            _orders.add(order);
-            return order;
+        if (!_orderingEnabled) throw new OrderingDisabledException();
+        if (0 == order.items().size()) throw new EmptyOrderException();
 
-        } else {
-            throw new OrderingDisabledException();
-        }
+        _lastId++;
+        order.setID(String.format("%05X", _lastId));
+        _orders.add(order);
+        return order;
     }
 
     public void cancel(Order order) {

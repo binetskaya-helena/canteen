@@ -41,7 +41,7 @@ public class MenuActivity extends CanteenActivity {
         performRequest(new Runnable() {
             @Override
             public void run() {
-                PublishingDetails details = _client.getCurrentMenu();
+                final PublishingDetails details = _client.getCurrentMenu();
 
                 ViewGroup view = (ViewGroup)findViewById(R.id.menu);
                 view.removeAllViews();
@@ -59,16 +59,31 @@ public class MenuActivity extends CanteenActivity {
                                 } else {
                                     _orderBuilder.removeItem(dish, 1);
                                 }
+                                updateSubmittingButton(details);
                             }
                         });
                         view.addView(dishView);
                     }
                 }
-                Button orderButton = (Button)findViewById(R.id.order);
-                orderButton.setEnabled(details.orderingEnabled);
-                orderButton.setText(details.orderingEnabled ? "Order Now" : "Sorry. To late for pre-ordering.");
+                updateSubmittingButton(details);
             }
         });
+    }
+
+    private void updateSubmittingButton(PublishingDetails details) {
+        Button orderButton = (Button)findViewById(R.id.order);
+        if (!details.orderingEnabled) {
+            orderButton.setEnabled(false);
+            orderButton.setText("Sorry. To late for pre-ordering.");
+
+        } else if (_orderBuilder.items().size() == 0) {
+            orderButton.setEnabled(false);
+            orderButton.setText("Nothing selected");
+
+        } else {
+            orderButton.setEnabled(true);
+            orderButton.setText("Order Now");
+        }
     }
 
     private void onClickOrderNow() {

@@ -13,10 +13,23 @@ public class OrdersProcessor_Tests extends AndroidTestCase {
         processor.setOrderingEnabled(false);
 
         Order order = new Order();
+        order.addItem(new Dish("test dish 1", "good test dish 1", new BigDecimal(5.45)), 1);
         try {
             processor.submit(order);
             fail("Ordering should be disabled");
         } catch (OrdersProcessor.OrderingDisabledException ex) {
+            // OK
+        }
+    }
+
+    public void testFailingOnEmptyOrder() {
+        OrdersProcessor processor = new OrdersProcessor();
+        processor.setOrderingEnabled(true);
+        Order emptyOrder = new Order();
+        try {
+            processor.submit(emptyOrder);
+            fail("Should not submit an empty order");
+        } catch (OrdersProcessor.EmptyOrderException ex) {
             // OK
         }
     }
