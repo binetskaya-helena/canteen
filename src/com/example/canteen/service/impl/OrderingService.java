@@ -4,6 +4,7 @@ import com.example.canteen.service.TimeService;
 import com.example.canteen.service.data.Order;
 import com.example.canteen.service.data.PublishingDetails;
 
+/** Controls for when the ordering is enabled according to the menu schedule state. */
 public class OrderingService {
     private final OrdersProcessor _ordersProcessor;
     private final MenuSchedule _menuSchedule;

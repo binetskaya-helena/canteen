@@ -5,6 +5,7 @@ import com.example.canteen.service.data.Order;
 
 import java.util.*;
 
+/** Stores all the submitted orders in the system. Provides access to the list of submitted orders. */
 public class OrdersProcessor {
     private static int _lastId;
 
@@ -14,11 +15,16 @@ public class OrdersProcessor {
     public class OrderingDisabledException extends RuntimeException {}
     public class EmptyOrderException extends RuntimeException {}
 
+    /** Enables or disables the making of orders. */
     public void setOrderingEnabled(boolean orderingEnabled) {
         _orderingEnabled = orderingEnabled;
     }
 
-    public Order submit(Order order) throws OrderingDisabledException {
+    /** Creates a new order in the system. The ordering should be enabled for the order to be created, otherwise
+     * an OrderingDisabledException is thrown. The order should contain order items, otherwise
+     * an EmptyOrderException is thrown.
+     */
+    public Order submit(Order order) throws OrderingDisabledException, EmptyOrderException {
         if (!_orderingEnabled) throw new OrderingDisabledException();
         if (0 == order.items().size()) throw new EmptyOrderException();
 
@@ -28,10 +34,12 @@ public class OrdersProcessor {
         return order;
     }
 
+    /** Removes the given order from the system. */
     public void cancel(Order order) {
         _orders.remove(order);
     }
 
+    /** Returns the list of all dishes ordered for the given period of time. */
     public Map<Dish, Integer> getAggregatedDishes(Date from, Date to) {
         Map<Dish, Integer> dishes = new LinkedHashMap<Dish, Integer>();
         for (Order order : _orders) {

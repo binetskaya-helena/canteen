@@ -3,6 +3,7 @@ package com.example.canteen.service.data;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+/** Contains information about some dish cooked in the canteen. */
 public class Dish implements Serializable {
     private final String _name;
     private final String _description;
@@ -14,14 +15,17 @@ public class Dish implements Serializable {
         _price = price;
     }
 
+    /** Name of the dish. */
     public String name() {
         return _name;
     }
 
+    /** The displayed description of the dish. */
     public String description() {
         return _description;
     }
 
+    /** The price for one portion of the dish. */
     public BigDecimal price() {
         return _price;
     }

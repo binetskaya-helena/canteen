@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+/** Sets up canteen specific user groups. Assigns permissions to the new users. */
 public class AccountsService {
     private final AccountsManager _accountsManager;
     private final AccessControl _accessControl;
@@ -52,6 +53,7 @@ public class AccountsService {
         }
     }
 
+    /** Creates a new client user. The user will have the 'client' access privileges. */
     public void registerClient(String name, String password) {
         User user = new User(null, name);
         user = _accountsManager.addUser(user, password);

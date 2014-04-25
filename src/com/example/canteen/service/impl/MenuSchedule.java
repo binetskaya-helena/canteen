@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.PriorityQueue;
 
+/** Controls the schedule of menues and publishes them in the order of their publishing date. */
 public class MenuSchedule {
     private final TimeService _timeService;
     private PriorityQueue<Menu> _queue = new PriorityQueue<Menu>(1, new Comparator<Menu>() {
@@ -30,21 +31,25 @@ public class MenuSchedule {
         _timeService = timeService;
     }
 
+    /** Adds the given menu in the schedule. Returns a menu object referencing to the newly created menu. */
     public Menu schedule(final Menu menu) {
         _queue.add(menu);
         checkSchedule();
         return menu;
     }
 
+    /** Removes the given menu from the schedule. */
     public void remove(Menu menu) {
         _queue.remove(menu);
         checkSchedule();
     }
 
+    /** Returns the currently published menu. */
     public PublishingDetails currentMenu() {
         return _currentMenu;
     }
 
+    /** Returns the menu that should be published next before the given date. */
     public PublishingDetails nextMenuForDate(Date date) {
         Menu nextMenu = null;
         for (Menu menu : _queue) {
@@ -66,6 +71,7 @@ public class MenuSchedule {
         return details;
     }
 
+    /** Checks if a new menu should be published. */
     private void checkSchedule() {
         Date now = _timeService.now();
         PublishingDetails menuDetails = nextMenuForDate(now);
@@ -93,11 +99,12 @@ public class MenuSchedule {
         }
     }
 
+    /** Registers a callback to be called when the published menu changes. */
     public void setOnMenuUpdate(Runnable action) {
         _onMenuUpdate = action;
     }
 
-    public void notifyMenuUpdated() {
+    private void notifyMenuUpdated() {
         if (null != _onMenuUpdate) {
             _onMenuUpdate.run();
         }
